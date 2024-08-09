@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Particle Background Generator</title>
+    <style>
+    * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #ffffff;
+    overflow: hidden;
+}
+
+#particleCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2.5rem;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.controls {
+    display: grid;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+input[type="color"], input[type="range"] {
+    width: 100%;
+}
+
+input[type="color"] {
+    height: 40px;
+    border: none;
+    border-radius: 5px;
+}
+
+input[type="range"] {
+    -webkit-appearance: none;
+    height: 10px;
+    border-radius: 5px;
+    background: #4CAF50;
+    outline: none;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+input[type="range"]:hover {
+    opacity: 1;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ffffff;
+    cursor: pointer;
+}
+
+.output {
+    margin-top: 2rem;
+}
+
+textarea {
+    width: 100%;
+    height: 150px;
+    resize: none;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+}
+
+button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+@media (max-width: 600px) {
+    .container {
+        margin: 1rem;
+        padding: 1rem;
+    }
+}
+    
+    </style>
+</head>
+<body>
+    <canvas id="particleCanvas"></canvas>
+    <div class="container">
+        <h1>Particle Background Generator</h1>
+        <div class="controls">
+            <div class="control-group">
+                <label for="particleColor">Particle Color:</label>
+                <input type="color" id="particleColor" value="#ffffff">
+            </div>
+            <div class="control-group">
+                <label for="particleCount">Particle Count:</label>
+                <input type="range" id="particleCount" min="50" max="500" value="200">
+            </div>
+            <div class="control-group">
+                <label for="particleSize">Particle Size:</label>
+                <input type="range" id="particleSize" min="1" max="10" value="2">
+            </div>
+            <div class="control-group">
+                <label for="particleSpeed">Particle Speed:</label>
+                <input type="range" id="particleSpeed" min="1" max="10" value="5">
+            </div>
+            <div class="control-group">
+                <label for="backgroundColor">Background Color:</label>
+                <input type="color" id="backgroundColor" value="#000000">
+            </div>
+        </div>
+        <div class="output">
+            <textarea id="js-output" readonly></textarea>
+            <button id="copy">Copy JavaScript</button>
+        </div>
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+    const canvas = document.getElementById('particleCanvas');
+    const ctx = canvas.getContext('2d');
+    const particleColor = document.getElementById('particleColor');
+    const particleCount = document.getElementById('particleCount');
+    const particleSize = document.getElementById('particleSize');
+    const particleSpeed = document.getElementById('particleSpeed');
+    const backgroundColor = document.getElementById('backgroundColor');
+    const jsOutput = document.getElementById('js-output');
+    const copyBtn = document.getElementById('copy');
+
+    let particles = [];
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * parseFloat(particleSize.value) + 1;
+            this.speedX = (Math.random() - 0.5) * parseFloat(particleSpeed.value);
+            this.speedY = (Math.random() - 0.5) * parseFloat(particleSpeed.value);
+        }
+
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+
+            if (this.x > canvas.width) this.x = 0;
+            else if (this.x < 0) this.x = canvas.width;
+            if (this.y > canvas.height) this.y = 0;
+            else if (this.y < 0) this.y = canvas.height;
+        }
+
+        draw() {
+            ctx.fillStyle = particleColor.value;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.fill();
+        }
+    }
+
+    function createParticles() {
+        particles = [];
+        for (let i = 0; i < parseInt(particleCount.value); i++) {
+            particles.push(new Particle());
+        }
+    }
+
+    function animateParticles() {
+        ctx.fillStyle = backgroundColor.value;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        particles.forEach(particle => {
+            particle.update();
+            particle.draw();
+        });
+
+        requestAnimationFrame(animateParticles);
+    }
+
+    function generateJS() {
+        const js = `
+const canvas = document.getElementById('particleCanvas');
+const ctx = canvas.getContext('2d');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particles = [];
+
+class Particle {
+    constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * ${particleSize.value} + 1;
+        this.speedX = (Math.random() - 0.5) * ${particleSpeed.value};
+        this.speedY = (Math.random() - 0.5) * ${particleSpeed.value};
+    }
+
+    update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+
+        if (this.x > canvas.width) this.x = 0;
+        else if (this.x < 0) this.x = canvas.width;
+        if (this.y > canvas.height) this.y = 0;
+        else if (this.y < 0) this.y = canvas.height;
+    }
+
+    draw() {
+        ctx.fillStyle = '${particleColor.value}';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.fill();
+    }
+}
+
+function createParticles() {
+    particles = [];
+    for (let i = 0; i < ${particleCount.value}; i++) {
+        particles.push(new Particle());
+    }
+}
+
+function animateParticles() {
+    ctx.fillStyle = '${backgroundColor.value}';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    particles.forEach(particle => {
+        particle.update();
+        particle.draw();
+    });
+
+    requestAnimationFrame(animateParticles);
+}
+
+createParticles();
+animateParticles();
+`;
+
+        jsOutput.value = js.trim();
+    }
+
+    function updateParticles() {
+        createParticles();
+        generateJS();
+    }
+
+    particleColor.addEventListener('input', updateParticles);
+    particleCount.addEventListener('input', updateParticles);
+    particleSize.addEventListener('input', updateParticles);
+    particleSpeed.addEventListener('input', updateParticles);
+    backgroundColor.addEventListener('input', updateParticles);
+
+    copyBtn.addEventListener('click', () => {
+        jsOutput.select();
+        document.execCommand('copy');
+        alert('JavaScript copied to clipboard!');
+    });
+
+    createParticles();
+    animateParticles();
+    generateJS();
+});
+    
+    </script>
+</body>
+</html>
