@@ -1,6 +1,9 @@
 # 2D-Animated-Background-Generator
 
-``https://github.com/CryptoQuestVikas/2D-Animated-Background-Generator-.git``
+```
+https://github.com/CryptoQuestVikas/2D-Animated-Background-Generator-.git
+cd 2D-Animated-Background-Generator-
+```
 
 # Screenshot
 > 1. RGB AND RGBA Background Generator
