@@ -6,8 +6,6 @@
 ![](img/bggen1.png)
 
 > 2. 2D Background Generator
+
 ![](img/bggen2.png)
-
-<br>
-
 ![](img/bggen3.png)
